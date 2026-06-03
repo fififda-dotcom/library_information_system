@@ -7,18 +7,22 @@ class BookController extends BaseController
 {
     public function index(): string
     {
-        $bookModel = new BookModel();
-        $data['books'] = $bookModel->findAll(); // semua yang ada atau tidak dihapus
+       
         $data['title'] = 'Daftar Buku';
 
         return view('books/index', $data);
     }
     
-    public function create()
+   public function ajaxTable()
     {
-        $data['title'] = 'Tambah Buku';
-        return view('books/create', $data);
-    }
+        $bookModel = new \App\Models\BookModel(); // Memanggil model buku
+
+        // 1. Ambil semua data buku dari database dan simpan di variabel $data['books']
+        $data['books'] = $bookModel->findAll(); 
+
+        // 2. Kirim data tersebut ke file view _table.php
+        return view('books/_table', $data); 
+    } // 
 
     public function store()
     {
@@ -96,17 +100,21 @@ class BookController extends BaseController
         return redirect()->to('/list/books');
     }
 
+    
+    
     public function delete($id)
     {
+        if ($this->request->isAJAX()) 
+        {
         $bookModel = new BookModel();
         $isDeleted = $bookModel->delete($id);
-
-        if($isDeleted) {
-            session()->setFlashdata('success', 'Buku berhasil dihapus!');
-        } else {
-            session()->setFlashdata('error', 'Gagal menghapus buku. Silakan coba lagi.');
+        
+        if ($isDeleted) {
+                return $this->response->setJSON(['status' => 'success', 'code' => 200, 'message' => 'Buku berhasil dihapus!']);
+            } else {
+                return $this->response->setJSON(['status' => 'error', 'code' => 500, 'message' => 'Gagal menghapus buku. Silakan coba lagi.']);
+            }
         }
-
         return redirect()->to('/list/books');
     }
 }
