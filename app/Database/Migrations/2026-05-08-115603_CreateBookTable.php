@@ -65,6 +65,6 @@ class CreateBookTable extends Migration
     public function down()
     {
         //
-        $this->forge->dropTable('books');
+        $this->forge->createTable('books', true);
     }
 }
